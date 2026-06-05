@@ -41,12 +41,16 @@ output:
         "div",
         "rem",
         "nop",
+        "ecall",
         "legal"
       ]
 decodes:
   - instr: "nop"
     match: "00000000000000000000000000010011"
     decodes: ["nop", "legal"]
+  - instr: "ecall"
+    match: "00000000000000000000000001110011"
+    decodes: ["ecall", "legal"]
   - instr: "add"
     match: "0000000..........000.....0110011"
     decodes: ["alu", "rs1", "rs2", "rd", "add", "legal"]
