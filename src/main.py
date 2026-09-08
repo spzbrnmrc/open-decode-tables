@@ -47,7 +47,6 @@ def gen_sv_footer(data):
     return footer
 
 def gen_sv_type_header(data):
-    body = f"typedef struct packed {{\n"
     fields = []
     output = data["output"]
     for x in output:
@@ -60,9 +59,15 @@ def gen_sv_type_header(data):
         if "type_name" in x.keys():
             type_name = x["type_name"]
             break
+    # Include guards: file is both on flists and `include`d from types.svh.
+    guard = f"{type_name.upper()}_SVH"
+    body = f"`ifndef {guard}\n"
+    body += f"`define {guard}\n"
+    body += f"typedef struct packed {{\n"
     for f in fields:
         body += f"\tlogic {f};\n"
     body += f"}} {type_name};\n"
+    body += f"`endif\n"
     return body, type_name
 
 def backend_native(data):
