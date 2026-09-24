@@ -1,0 +1,235 @@
+# Copyright (c) 2025 Siliscale Consulting, LLC
+# SPDX-License-Identifier: Apache-2.0
+#
+# v1 custom subset of RVV 1.0 (not full Zve32x). Rows land per slice.
+# Slice A: vset* + csrr of vl / vtype / vlenb.
+# Slice B: unit-stride unmasked vle32.v / vse32.v.
+# Slice C: unmasked vmv.v.{v,x,i} + vadd.v{v,x,i}.
+# Slice D: vsub.v{v,x}, vrsub.v{x,i}, vand/vor/vxor.v{v,x,i}.
+# Slice E: unmasked vmin[u]/vmax[u].v{v,x} (no .vi).
+# Slice F: vsll/vsrl/vsra.v{v,x,i}; unmasked compares (mask dest).
+
+module_name: zve32x_decoder
+input: 32
+output:
+  - type_name: "zve32x_decode_out_t"
+  - fields:
+      [
+        "vec",
+        "vset",
+        "vcsr",
+        "vload",
+        "vstore",
+        "valu",
+        "rs1",
+        "rs2",
+        "rd",
+        "legal",
+      ]
+decodes:
+  # vsetvli rd, rs1, vtypei   inst[31]=0, funct3=111, opcode=OP-V
+  - instr: "vsetvli"
+    match: "0................111.....1010111"
+    decodes: ["vec", "vset", "rs1", "rd", "legal"]
+  # vsetivli rd, uimm, vtypei inst[31:30]=11, funct3=111
+  - instr: "vsetivli"
+    match: "11...............111.....1010111"
+    decodes: ["vec", "vset", "rd", "legal"]
+  # vsetvl rd, rs1, rs2       inst[31:25]=1000000, funct3=111
+  - instr: "vsetvl"
+    match: "1000000..........111.....1010111"
+    decodes: ["vec", "vset", "rs1", "rs2", "rd", "legal"]
+  # csrrs rd, vl, x0
+  - instr: "csrr_vl"
+    match: "11000010000000000010.....1110011"
+    decodes: ["vcsr", "rd", "legal"]
+  # csrrs rd, vtype, x0
+  - instr: "csrr_vtype"
+    match: "11000010000100000010.....1110011"
+    decodes: ["vcsr", "rd", "legal"]
+  # csrrs rd, vlenb, x0
+  - instr: "csrr_vlenb"
+    match: "11000010001000000010.....1110011"
+    decodes: ["vcsr", "rd", "legal"]
+  # vle32.v vd, (rs1)  nf=0 mew=0 mop=00 vm=1 lumop=0 width=e32 opcode=LOAD-FP
+  - instr: "vle32"
+    match: "000000100000.....110.....0000111"
+    decodes: ["vec", "vload", "rs1", "rd", "legal"]
+  # vse32.v vs3, (rs1) nf=0 mew=0 mop=00 vm=1 sumop=0 width=e32 opcode=STORE-FP
+  - instr: "vse32"
+    match: "000000100000.....110.....0100111"
+    decodes: ["vec", "vstore", "rs1", "rd", "legal"]
+  # vadd.vv vd, vs2, vs1
+  - instr: "vadd_vv"
+    match: "0000001..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  # vadd.vx vd, vs2, rs1
+  - instr: "vadd_vx"
+    match: "0000001..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  # vadd.vi vd, vs2, simm5
+  - instr: "vadd_vi"
+    match: "0000001..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  # vmv.v.v vd, vs1  (vmerge funct6, vm=1, vs2=v0)
+  - instr: "vmv_vv"
+    match: "010111100000.....000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  # vmv.v.x vd, rs1
+  - instr: "vmv_vx"
+    match: "010111100000.....100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  # vmv.v.i vd, simm5
+  - instr: "vmv_vi"
+    match: "010111100000.....011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vsub_vv"
+    match: "0000101..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vsub_vx"
+    match: "0000101..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vrsub_vx"
+    match: "0000111..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vrsub_vi"
+    match: "0000111..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vand_vv"
+    match: "0010011..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vand_vx"
+    match: "0010011..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vand_vi"
+    match: "0010011..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vor_vv"
+    match: "0010101..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vor_vx"
+    match: "0010101..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vor_vi"
+    match: "0010101..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vxor_vv"
+    match: "0010111..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vxor_vx"
+    match: "0010111..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vxor_vi"
+    match: "0010111..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vminu_vv"
+    match: "0001001..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vminu_vx"
+    match: "0001001..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmin_vv"
+    match: "0001011..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmin_vx"
+    match: "0001011..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmaxu_vv"
+    match: "0001101..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmaxu_vx"
+    match: "0001101..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmax_vv"
+    match: "0001111..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmax_vx"
+    match: "0001111..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vsll_vv"
+    match: "1001011..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vsll_vx"
+    match: "1001011..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vsll_vi"
+    match: "1001011..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vsrl_vv"
+    match: "1010001..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vsrl_vx"
+    match: "1010001..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vsrl_vi"
+    match: "1010001..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vsra_vv"
+    match: "1010011..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vsra_vx"
+    match: "1010011..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vsra_vi"
+    match: "1010011..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmseq_vv"
+    match: "0110001..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmseq_vx"
+    match: "0110001..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmseq_vi"
+    match: "0110001..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsne_vv"
+    match: "0110011..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsne_vx"
+    match: "0110011..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmsne_vi"
+    match: "0110011..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsltu_vv"
+    match: "0110101..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsltu_vx"
+    match: "0110101..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmslt_vv"
+    match: "0110111..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmslt_vx"
+    match: "0110111..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmsleu_vv"
+    match: "0111001..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsleu_vx"
+    match: "0111001..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmsleu_vi"
+    match: "0111001..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsle_vv"
+    match: "0111011..........000.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsle_vx"
+    match: "0111011..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmsle_vi"
+    match: "0111011..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsgtu_vx"
+    match: "0111101..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmsgtu_vi"
+    match: "0111101..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
+  - instr: "vmsgt_vx"
+    match: "0111111..........100.....1010111"
+    decodes: ["vec", "valu", "rs1", "rd", "legal"]
+  - instr: "vmsgt_vi"
+    match: "0111111..........011.....1010111"
+    decodes: ["vec", "valu", "rd", "legal"]
