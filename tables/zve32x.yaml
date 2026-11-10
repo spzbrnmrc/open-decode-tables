@@ -1,5 +1,5 @@
 # Copyright (c) 2025 Siliscale Consulting, LLC
-# SPDX-License-Identifier: Apache-2.0
+# All rights reserved.
 #
 # v1 custom subset of RVV 1.0 (not full Zve32x). Rows land per slice.
 # Slice A: vset* + csrr of vl / vtype / vlenb.

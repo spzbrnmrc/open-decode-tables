@@ -29,7 +29,7 @@ open-decode-tables/
 ├── gen/                  # Generated output directory (gitignored)
 │   ├── rv32im_decoder.sv # Generated decoder module
 │   └── decode_out_t.svh # Generated output type definition
-├── LICENSE               # Apache License 2.0
+├── LICENSE               # Proprietary. All rights reserved.
 └── README.md            # This file
 ```
 
@@ -166,5 +166,5 @@ The generator performs automatic validation:
 
 ## License
 
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
+Proprietary. Copyright (c) 2025 Siliscale Consulting, LLC. All rights reserved. See [LICENSE](LICENSE).
 
