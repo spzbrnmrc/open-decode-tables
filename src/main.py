@@ -151,8 +151,13 @@ if __name__ == "__main__":
         file.close()
     logger.info(f"Generated {data['module_name']}.sv")
 
-    type_header, type_name = gen_sv_type_header(data)
-    with open(os.path.join(options.output, f"{type_name}.svh"), "w") as file:
-        file.write(type_header)
-        file.close()
-    logger.info(f"Generated {type_name}.svh")
+    # A table can reuse an existing packed result (rv32c uses decode_out_t).
+    # Writing the header again would clobber the integer table's typedef.
+    if data.get("emit_type", True):
+        type_header, type_name = gen_sv_type_header(data)
+        with open(os.path.join(options.output, f"{type_name}.svh"), "w") as file:
+            file.write(type_header)
+            file.close()
+        logger.info(f"Generated {type_name}.svh")
+    else:
+        logger.info(f"Skipping type header for {data['module_name']}")

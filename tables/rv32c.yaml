@@ -1,0 +1,132 @@
+module_name: rv32c_decoder
+input: 16
+emit_type: false
+output:
+  - type_name: "decode_out_t"
+  - fields:
+      [
+        "alu",
+        "rs1",
+        "rs2",
+        "imm12",
+        "rd",
+        "shimm5",
+        "imm20",
+        "pc",
+        "load",
+        "store",
+        "lsu",
+        "add",
+        "sub",
+        "land",
+        "lor",
+        "lxor",
+        "sll",
+        "sra",
+        "srl",
+        "slt",
+        "unsign",
+        "condbr",
+        "beq",
+        "bne",
+        "bge",
+        "blt",
+        "jal",
+        "by",
+        "half",
+        "word",
+        "mul",
+        "rs1_sign",
+        "rs2_sign",
+        "low",
+        "div",
+        "rem",
+        "nop",
+        "ecall",
+        "legal"
+      ]
+decodes:
+  # Quadrant 00. Floating-point and RV64 parcels fall through to illegal.
+  - instr: "c.addi4spn"
+    match: "000...........00"
+    decodes: ["alu", "rs1", "imm12", "rd", "add", "legal"]
+  - instr: "c.lw"
+    match: "010...........00"
+    decodes: ["lsu", "load", "rs1", "rd", "word", "legal"]
+  - instr: "c.sw"
+    match: "110...........00"
+    decodes: ["lsu", "store", "rs1", "rs2", "word", "legal"]
+  # Quadrant 01. Specific rd / funct fields come before the broad CI/CR forms.
+  - instr: "c.nop"
+    match: "000.00000.....01"
+    decodes: ["nop", "legal"]
+  - instr: "c.addi"
+    match: "000...........01"
+    decodes: ["alu", "rs1", "imm12", "rd", "add", "legal"]
+  - instr: "c.jal"
+    match: "001...........01"
+    decodes: ["alu", "imm20", "rd", "pc", "jal", "legal"]
+  - instr: "c.li"
+    match: "010...........01"
+    decodes: ["alu", "rs1", "imm12", "rd", "add", "legal"]
+  - instr: "c.addi16sp"
+    match: "011.00010.....01"
+    decodes: ["alu", "rs1", "imm12", "rd", "add", "legal"]
+  - instr: "c.lui"
+    match: "011...........01"
+    decodes: ["alu", "imm20", "rd", "lor", "legal"]
+  - instr: "c.srli"
+    match: "100.00........01"
+    decodes: ["alu", "rs1", "shimm5", "rd", "srl", "legal"]
+  - instr: "c.srai"
+    match: "100.01........01"
+    decodes: ["alu", "rs1", "shimm5", "rd", "sra", "legal"]
+  - instr: "c.andi"
+    match: "100.10........01"
+    decodes: ["alu", "rs1", "imm12", "rd", "land", "legal"]
+  - instr: "c.sub"
+    match: "100011...00...01"
+    decodes: ["alu", "rs1", "rs2", "rd", "sub", "legal"]
+  - instr: "c.xor"
+    match: "100011...01...01"
+    decodes: ["alu", "rs1", "rs2", "rd", "lxor", "legal"]
+  - instr: "c.or"
+    match: "100011...10...01"
+    decodes: ["alu", "rs1", "rs2", "rd", "lor", "legal"]
+  - instr: "c.and"
+    match: "100011...11...01"
+    decodes: ["alu", "rs1", "rs2", "rd", "land", "legal"]
+  - instr: "c.j"
+    match: "101...........01"
+    decodes: ["alu", "imm20", "pc", "jal", "legal"]
+  - instr: "c.beqz"
+    match: "110...........01"
+    decodes: ["alu", "rs1", "rs2", "sub", "condbr", "beq", "legal"]
+  - instr: "c.bnez"
+    match: "111...........01"
+    decodes: ["alu", "rs1", "rs2", "sub", "condbr", "bne", "legal"]
+  # Quadrant 10.
+  - instr: "c.slli"
+    match: "000...........10"
+    decodes: ["alu", "rs1", "shimm5", "rd", "sll", "legal"]
+  - instr: "c.lwsp"
+    match: "010...........10"
+    decodes: ["lsu", "load", "rs1", "rd", "word", "legal"]
+  - instr: "c.ebreak"
+    match: "1001000000000010"
+    decodes: ["nop", "legal"]
+  - instr: "c.jr"
+    match: "1000.....0000010"
+    decodes: ["alu", "rs1", "imm12", "jal", "legal"]
+  - instr: "c.mv"
+    match: "1000..........10"
+    decodes: ["alu", "rs1", "rs2", "rd", "add", "legal"]
+  - instr: "c.jalr"
+    match: "1001.....0000010"
+    decodes: ["alu", "rs1", "rd", "imm12", "jal", "legal"]
+  - instr: "c.add"
+    match: "1001..........10"
+    decodes: ["alu", "rs1", "rs2", "rd", "add", "legal"]
+  - instr: "c.swsp"
+    match: "110...........10"
+    decodes: ["lsu", "store", "rs1", "rs2", "word", "legal"]
