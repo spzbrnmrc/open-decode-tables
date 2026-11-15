@@ -1,0 +1,59 @@
+module_name: rv32a_decoder
+input: 32
+output:
+  - type_name: "rv32a_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "lsu",
+        "rs1",
+        "rs2",
+        "rd",
+        "word",
+        "lr",
+        "sc",
+        "swap",
+        "add",
+        "land",
+        "lor",
+        "lxor",
+        "min",
+        "max",
+        "unsign"
+      ]
+decodes:
+  # Opcode AMO, funct3 = word. aq and rl are don't-care.
+  # LR reserves rs2 = 0. A nonzero rs2 is not a legal LR.
+  - instr: "lr.w"
+    match: "00010??00000?????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rd", "word", "lr"]
+  - instr: "sc.w"
+    match: "00011????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "sc"]
+  - instr: "amoswap.w"
+    match: "00001????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "swap"]
+  - instr: "amoadd.w"
+    match: "00000????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "add"]
+  - instr: "amoxor.w"
+    match: "00100????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "lxor"]
+  - instr: "amoor.w"
+    match: "01000????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "lor"]
+  - instr: "amoand.w"
+    match: "01100????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "land"]
+  - instr: "amomin.w"
+    match: "10000????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "min"]
+  - instr: "amomax.w"
+    match: "10100????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "max"]
+  - instr: "amominu.w"
+    match: "11000????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "min", "unsign"]
+  - instr: "amomaxu.w"
+    match: "11100????????????010?????0101111"
+    decodes: ["legal", "lsu", "rs1", "rs2", "rd", "word", "max", "unsign"]
