@@ -43,7 +43,9 @@ output:
         "rem",
         "nop",
         "ecall",
-        "legal"
+        "legal",
+        "alu_w",
+        "dbl"
       ]
 decodes:
   # Quadrant 00. Floating-point and RV64 parcels fall through to illegal.

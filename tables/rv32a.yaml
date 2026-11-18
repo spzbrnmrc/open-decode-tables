@@ -19,7 +19,8 @@ output:
         "lxor",
         "min",
         "max",
-        "unsign"
+        "unsign",
+        "dbl"
       ]
 decodes:
   # Opcode AMO, funct3 = word. aq and rl are don't-care.

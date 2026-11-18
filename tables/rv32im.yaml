@@ -42,7 +42,9 @@ output:
         "rem",
         "nop",
         "ecall",
-        "legal"
+        "legal",
+        "alu_w",
+        "dbl"
       ]
 decodes:
   - instr: "nop"
