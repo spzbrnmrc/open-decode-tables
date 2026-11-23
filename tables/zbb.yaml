@@ -1,0 +1,119 @@
+# Zbb basic bit manipulation. One table for both XLEN.
+# rv64 is an encoding that does not exist in RV32 Zbb.
+# rv32 is an encoding that does not exist in RV64 Zbb.
+# A shift immediate with shamt[5] = 0 is legal at both widths.
+# shamt[5] = 1 is RV64 only.
+
+module_name: zbb_decoder
+input: 32
+output:
+  - type_name: "zbb_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "rv64",
+        "rv32",
+        "rd",
+        "rs1",
+        "rs2",
+        "shimm",
+        "word",
+        "andn",
+        "orn",
+        "lxnor",
+        "clz",
+        "ctz",
+        "cpop",
+        "max",
+        "min",
+        "unsign",
+        "sextb",
+        "sexth",
+        "zext",
+        "rol",
+        "ror",
+        "orcb",
+        "rev8",
+      ]
+decodes:
+  - instr: "andn"
+    match: "0100000..........111.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "andn"]
+  - instr: "orn"
+    match: "0100000..........110.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "orn"]
+  - instr: "xnor"
+    match: "0100000..........100.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "lxnor"]
+  - instr: "clz"
+    match: "011000000000.....001.....0010011"
+    decodes: ["legal", "rd", "rs1", "clz"]
+  - instr: "ctz"
+    match: "011000000001.....001.....0010011"
+    decodes: ["legal", "rd", "rs1", "ctz"]
+  - instr: "cpop"
+    match: "011000000010.....001.....0010011"
+    decodes: ["legal", "rd", "rs1", "cpop"]
+  - instr: "clzw"
+    match: "011000000000.....001.....0011011"
+    decodes: ["legal", "rv64", "rd", "rs1", "clz", "word"]
+  - instr: "ctzw"
+    match: "011000000001.....001.....0011011"
+    decodes: ["legal", "rv64", "rd", "rs1", "ctz", "word"]
+  - instr: "cpopw"
+    match: "011000000010.....001.....0011011"
+    decodes: ["legal", "rv64", "rd", "rs1", "cpop", "word"]
+  - instr: "max"
+    match: "0000101..........110.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "max"]
+  - instr: "maxu"
+    match: "0000101..........111.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "max", "unsign"]
+  - instr: "min"
+    match: "0000101..........100.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "min"]
+  - instr: "minu"
+    match: "0000101..........101.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "min", "unsign"]
+  - instr: "sext.b"
+    match: "011000000100.....001.....0010011"
+    decodes: ["legal", "rd", "rs1", "sextb"]
+  - instr: "sext.h"
+    match: "011000000101.....001.....0010011"
+    decodes: ["legal", "rd", "rs1", "sexth"]
+  - instr: "zext.h"
+    match: "000010000000.....100.....0110011"
+    decodes: ["legal", "rv32", "rd", "rs1", "zext"]
+  - instr: "zext.h"
+    match: "000010000000.....100.....0111011"
+    decodes: ["legal", "rv64", "rd", "rs1", "zext"]
+  - instr: "rol"
+    match: "0110000..........001.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "rol"]
+  - instr: "ror"
+    match: "0110000..........101.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "ror"]
+  - instr: "rori"
+    match: "0110000..........101.....0010011"
+    decodes: ["legal", "rd", "rs1", "shimm", "ror"]
+  - instr: "rori"
+    match: "0110001..........101.....0010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "shimm", "ror"]
+  - instr: "rolw"
+    match: "0110000..........001.....0111011"
+    decodes: ["legal", "rv64", "rd", "rs1", "rs2", "rol", "word"]
+  - instr: "rorw"
+    match: "0110000..........101.....0111011"
+    decodes: ["legal", "rv64", "rd", "rs1", "rs2", "ror", "word"]
+  - instr: "roriw"
+    match: "0110000..........101.....0011011"
+    decodes: ["legal", "rv64", "rd", "rs1", "shimm", "ror", "word"]
+  - instr: "orc.b"
+    match: "001010000111.....101.....0010011"
+    decodes: ["legal", "rd", "rs1", "orcb"]
+  - instr: "rev8"
+    match: "011010011000.....101.....0010011"
+    decodes: ["legal", "rv32", "rd", "rs1", "rev8"]
+  - instr: "rev8"
+    match: "011010111000.....101.....0010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "rev8"]

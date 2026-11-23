@@ -1,0 +1,85 @@
+# Zfa on top of F and D. Half-precision Zfa needs Zfh, which this table does not include.
+# fli's immediate is instr[19:15]. instr[24:20] is 1, which keeps fli off fmv.w.x and fmv.d.x.
+# fmvh.x.d and fmvp.d.x are RV32. fcvtmod.w.d rounds toward zero and is both widths.
+
+module_name: zfa_decoder
+input: 32
+output:
+  - type_name: "zfa_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "rv32",
+        "rd",
+        "rs1",
+        "rs2",
+        "fli_s",
+        "fli_d",
+        "minm_s",
+        "maxm_s",
+        "minm_d",
+        "maxm_d",
+        "round_s",
+        "roundnx_s",
+        "round_d",
+        "roundnx_d",
+        "leq_s",
+        "ltq_s",
+        "leq_d",
+        "ltq_d",
+        "cvtmod",
+        "mvh",
+        "mvp",
+      ]
+decodes:
+  - instr: "fli.s"
+    match: "111100000001.....000.....1010011"
+    decodes: ["legal", "rd", "rs1", "fli_s"]
+  - instr: "fli.d"
+    match: "111100100001.....000.....1010011"
+    decodes: ["legal", "rd", "rs1", "fli_d"]
+  - instr: "fminm.s"
+    match: "0010100..........010.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "minm_s"]
+  - instr: "fmaxm.s"
+    match: "0010100..........011.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "maxm_s"]
+  - instr: "fminm.d"
+    match: "0010101..........010.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "minm_d"]
+  - instr: "fmaxm.d"
+    match: "0010101..........011.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "maxm_d"]
+  - instr: "fround.s"
+    match: "010000000100.............1010011"
+    decodes: ["legal", "rd", "rs1", "round_s"]
+  - instr: "froundnx.s"
+    match: "010000000101.............1010011"
+    decodes: ["legal", "rd", "rs1", "roundnx_s"]
+  - instr: "fround.d"
+    match: "010000100100.............1010011"
+    decodes: ["legal", "rd", "rs1", "round_d"]
+  - instr: "froundnx.d"
+    match: "010000100101.............1010011"
+    decodes: ["legal", "rd", "rs1", "roundnx_d"]
+  - instr: "fleq.s"
+    match: "1010000..........100.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "leq_s"]
+  - instr: "fltq.s"
+    match: "1010000..........101.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "ltq_s"]
+  - instr: "fleq.d"
+    match: "1010001..........100.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "leq_d"]
+  - instr: "fltq.d"
+    match: "1010001..........101.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "ltq_d"]
+  - instr: "fcvtmod.w.d"
+    match: "110000101000.....001.....1010011"
+    decodes: ["legal", "rd", "rs1", "cvtmod"]
+  - instr: "fmvh.x.d"
+    match: "111000100001.....000.....1010011"
+    decodes: ["legal", "rv32", "rd", "rs1", "mvh"]
+  - instr: "fmvp.d.x"
+    match: "1011001..........000.....1010011"
+    decodes: ["legal", "rv32", "rd", "rs1", "rs2", "mvp"]

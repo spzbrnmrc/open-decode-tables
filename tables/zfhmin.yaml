@@ -1,0 +1,40 @@
+# Zfhmin. Half-precision load, store, move, and conversion to and from single.
+# Full Zfh arithmetic is a different extension and is not in this table.
+# A half value in an F register is NaN-boxed in the bits above 15.
+
+module_name: zfhmin_decoder
+input: 32
+output:
+  - type_name: "zfhmin_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "rd",
+        "rs1",
+        "rs2",
+        "load",
+        "store",
+        "to_s",
+        "from_s",
+        "mv_to_x",
+        "mv_from_x",
+      ]
+decodes:
+  - instr: "flh"
+    match: ".................001.....0000111"
+    decodes: ["legal", "rd", "rs1", "load"]
+  - instr: "fsh"
+    match: ".................001.....0100111"
+    decodes: ["legal", "rs1", "rs2", "store"]
+  - instr: "fcvt.s.h"
+    match: "010000000010.............1010011"
+    decodes: ["legal", "rd", "rs1", "to_s"]
+  - instr: "fcvt.h.s"
+    match: "010001000000.............1010011"
+    decodes: ["legal", "rd", "rs1", "from_s"]
+  - instr: "fmv.x.h"
+    match: "111001000000.....000.....1010011"
+    decodes: ["legal", "rd", "rs1", "mv_to_x"]
+  - instr: "fmv.h.x"
+    match: "111101000000.....000.....1010011"
+    decodes: ["legal", "rd", "rs1", "mv_from_x"]

@@ -42,9 +42,18 @@ output:
         "rem",
         "nop",
         "ecall",
+        "csr",
+        "ebreak",
+        "mret",
+        "sfence",
+        "wfi",
+        "fence",
         "legal",
         "alu_w",
-        "dbl"
+        "dbl",
+        "c_sp",
+        "c_prime",
+        "c_rs1_x0"
       ]
 decodes:
   - instr: "nop"
@@ -53,6 +62,43 @@ decodes:
   - instr: "ecall"
     match: "00000000000000000000000001110011"
     decodes: ["ecall", "legal"]
+  - instr: "ebreak"
+    match: "00000000000100000000000001110011"
+    decodes: ["ebreak", "legal"]
+  - instr: "mret"
+    match: "00110000001000000000000001110011"
+    decodes: ["mret", "legal"]
+  - instr: "wfi"
+    match: "00010000010100000000000001110011"
+    decodes: ["wfi", "legal"]
+  - instr: "sfence.vma"
+    match: "0001001..........000000001110011"
+    decodes: ["sfence", "legal"]
+  # pred/succ are ignored. One LSU, so every fence drains it.
+  - instr: "fence"
+    match: "............00000000000000001111"
+    decodes: ["fence", "legal"]
+  - instr: "fence.i"
+    match: "............00000001000000001111"
+    decodes: ["fence", "legal"]
+  - instr: "csrrw"
+    match: ".................001.....1110011"
+    decodes: ["csr", "rs1", "legal"]
+  - instr: "csrrs"
+    match: ".................010.....1110011"
+    decodes: ["csr", "rs1", "legal"]
+  - instr: "csrrc"
+    match: ".................011.....1110011"
+    decodes: ["csr", "rs1", "legal"]
+  - instr: "csrrwi"
+    match: ".................101.....1110011"
+    decodes: ["csr", "legal"]
+  - instr: "csrrsi"
+    match: ".................110.....1110011"
+    decodes: ["csr", "legal"]
+  - instr: "csrrci"
+    match: ".................111.....1110011"
+    decodes: ["csr", "legal"]
   - instr: "add"
     match: "0000000..........000.....0110011"
     decodes: ["alu", "rs1", "rs2", "rd", "add", "legal"]

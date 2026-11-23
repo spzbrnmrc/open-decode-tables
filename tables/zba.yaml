@@ -1,0 +1,48 @@
+# Zba address calculation. One table for both XLEN.
+# rv64 marks an encoding that is not part of RV32 Zba. exu_bit drops the
+# result there, and the pipe treats the bit as an illegal instruction.
+# slli.uw and the .uw adds are RV64. sh1add, sh2add, and sh3add are both.
+
+module_name: zba_decoder
+input: 32
+output:
+  - type_name: "zba_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "rv64",
+        "rd",
+        "rs1",
+        "rs2",
+        "shimm",
+        "sh1",
+        "sh2",
+        "sh3",
+        "uw",
+        "sll",
+      ]
+decodes:
+  - instr: "sh1add"
+    match: "0010000..........010.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "sh1"]
+  - instr: "sh2add"
+    match: "0010000..........100.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "sh2"]
+  - instr: "sh3add"
+    match: "0010000..........110.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "sh3"]
+  - instr: "add.uw"
+    match: "0000100..........000.....0111011"
+    decodes: ["legal", "rv64", "rd", "rs1", "rs2", "uw"]
+  - instr: "sh1add.uw"
+    match: "0010000..........010.....0111011"
+    decodes: ["legal", "rv64", "rd", "rs1", "rs2", "sh1", "uw"]
+  - instr: "sh2add.uw"
+    match: "0010000..........100.....0111011"
+    decodes: ["legal", "rv64", "rd", "rs1", "rs2", "sh2", "uw"]
+  - instr: "sh3add.uw"
+    match: "0010000..........110.....0111011"
+    decodes: ["legal", "rv64", "rd", "rs1", "rs2", "sh3", "uw"]
+  - instr: "slli.uw"
+    match: "000010...........001.....0011011"
+    decodes: ["legal", "rv64", "rd", "rs1", "shimm", "uw", "sll"]

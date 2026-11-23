@@ -1,0 +1,58 @@
+# Zbs single-bit operations. One table for both XLEN.
+# The immediate forms with shamt[5] = 0 are legal at both widths.
+# shamt[5] = 1 is RV64 only and is marked rv64.
+
+module_name: zbs_decoder
+input: 32
+output:
+  - type_name: "zbs_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "rv64",
+        "rd",
+        "rs1",
+        "rs2",
+        "shimm",
+        "clr",
+        "ext",
+        "inv",
+        "set",
+      ]
+decodes:
+  - instr: "bclr"
+    match: "0100100..........001.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "clr"]
+  - instr: "bext"
+    match: "0100100..........101.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "ext"]
+  - instr: "binv"
+    match: "0110100..........001.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "inv"]
+  - instr: "bset"
+    match: "0010100..........001.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "set"]
+  - instr: "bclri"
+    match: "0100100..........001.....0010011"
+    decodes: ["legal", "rd", "rs1", "shimm", "clr"]
+  - instr: "bclri"
+    match: "0100101..........001.....0010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "shimm", "clr"]
+  - instr: "bexti"
+    match: "0100100..........101.....0010011"
+    decodes: ["legal", "rd", "rs1", "shimm", "ext"]
+  - instr: "bexti"
+    match: "0100101..........101.....0010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "shimm", "ext"]
+  - instr: "binvi"
+    match: "0110100..........001.....0010011"
+    decodes: ["legal", "rd", "rs1", "shimm", "inv"]
+  - instr: "binvi"
+    match: "0110101..........001.....0010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "shimm", "inv"]
+  - instr: "bseti"
+    match: "0010100..........001.....0010011"
+    decodes: ["legal", "rd", "rs1", "shimm", "set"]
+  - instr: "bseti"
+    match: "0010101..........001.....0010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "shimm", "set"]

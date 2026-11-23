@@ -1,0 +1,22 @@
+# Zicond. Both instructions exist at XLEN 32 and 64. No CSR.
+
+module_name: zicond_decoder
+input: 32
+output:
+  - type_name: "zicond_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "rd",
+        "rs1",
+        "rs2",
+        "eqz",
+        "nez",
+      ]
+decodes:
+  - instr: "czero.eqz"
+    match: "0000111..........101.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "eqz"]
+  - instr: "czero.nez"
+    match: "0000111..........111.....0110011"
+    decodes: ["legal", "rd", "rs1", "rs2", "nez"]

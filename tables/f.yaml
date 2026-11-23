@@ -1,0 +1,139 @@
+# F, single precision. One table for both XLEN.
+# rv64 marks fcvt.l.s, fcvt.lu.s, fcvt.s.l, and fcvt.s.lu.
+# Rounding mode is instr[14:12]. 111 means the value in frm.
+# flw and fsw are the scalar LOAD-FP and STORE-FP forms. Vector uses width 110.
+
+module_name: f_decoder
+input: 32
+output:
+  - type_name: "f_decode_out_t"
+  - fields:
+      [
+        "legal",
+        "rv64",
+        "rd",
+        "rs1",
+        "rs2",
+        "rs3",
+        "load",
+        "store",
+        "madd",
+        "msub",
+        "nmsub",
+        "nmadd",
+        "add",
+        "sub",
+        "mul",
+        "div",
+        "sqrt",
+        "sgnj",
+        "sgnjn",
+        "sgnjx",
+        "min",
+        "max",
+        "to_w",
+        "to_wu",
+        "to_l",
+        "to_lu",
+        "from_w",
+        "from_wu",
+        "from_l",
+        "from_lu",
+        "mv_to_x",
+        "mv_from_x",
+        "eq",
+        "lt",
+        "le",
+        "class",
+      ]
+decodes:
+  - instr: "flw"
+    match: ".................010.....0000111"
+    decodes: ["legal", "rd", "rs1", "load"]
+  - instr: "fsw"
+    match: ".................010.....0100111"
+    decodes: ["legal", "rs1", "rs2", "store"]
+  - instr: "fmadd.s"
+    match: ".....00..................1000011"
+    decodes: ["legal", "rd", "rs1", "rs2", "rs3", "madd"]
+  - instr: "fmsub.s"
+    match: ".....00..................1000111"
+    decodes: ["legal", "rd", "rs1", "rs2", "rs3", "msub"]
+  - instr: "fnmsub.s"
+    match: ".....00..................1001011"
+    decodes: ["legal", "rd", "rs1", "rs2", "rs3", "nmsub"]
+  - instr: "fnmadd.s"
+    match: ".....00..................1001111"
+    decodes: ["legal", "rd", "rs1", "rs2", "rs3", "nmadd"]
+  - instr: "fadd.s"
+    match: "0000000..................1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "add"]
+  - instr: "fsub.s"
+    match: "0000100..................1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "sub"]
+  - instr: "fmul.s"
+    match: "0001000..................1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "mul"]
+  - instr: "fdiv.s"
+    match: "0001100..................1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "div"]
+  - instr: "fsqrt.s"
+    match: "010110000000.............1010011"
+    decodes: ["legal", "rd", "rs1", "sqrt"]
+  - instr: "fsgnj.s"
+    match: "0010000..........000.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "sgnj"]
+  - instr: "fsgnjn.s"
+    match: "0010000..........001.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "sgnjn"]
+  - instr: "fsgnjx.s"
+    match: "0010000..........010.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "sgnjx"]
+  - instr: "fmin.s"
+    match: "0010100..........000.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "min"]
+  - instr: "fmax.s"
+    match: "0010100..........001.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "max"]
+  - instr: "fcvt.w.s"
+    match: "110000000000.............1010011"
+    decodes: ["legal", "rd", "rs1", "to_w"]
+  - instr: "fcvt.wu.s"
+    match: "110000000001.............1010011"
+    decodes: ["legal", "rd", "rs1", "to_wu"]
+  - instr: "fcvt.l.s"
+    match: "110000000010.............1010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "to_l"]
+  - instr: "fcvt.lu.s"
+    match: "110000000011.............1010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "to_lu"]
+  - instr: "fmv.x.w"
+    match: "111000000000.....000.....1010011"
+    decodes: ["legal", "rd", "rs1", "mv_to_x"]
+  - instr: "feq.s"
+    match: "1010000..........010.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "eq"]
+  - instr: "flt.s"
+    match: "1010000..........001.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "lt"]
+  - instr: "fle.s"
+    match: "1010000..........000.....1010011"
+    decodes: ["legal", "rd", "rs1", "rs2", "le"]
+  - instr: "fclass.s"
+    match: "111000000000.....001.....1010011"
+    decodes: ["legal", "rd", "rs1", "class"]
+  - instr: "fcvt.s.w"
+    match: "110100000000.............1010011"
+    decodes: ["legal", "rd", "rs1", "from_w"]
+  - instr: "fcvt.s.wu"
+    match: "110100000001.............1010011"
+    decodes: ["legal", "rd", "rs1", "from_wu"]
+  - instr: "fcvt.s.l"
+    match: "110100000010.............1010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "from_l"]
+  - instr: "fcvt.s.lu"
+    match: "110100000011.............1010011"
+    decodes: ["legal", "rv64", "rd", "rs1", "from_lu"]
+  - instr: "fmv.w.x"
+    match: "111100000000.....000.....1010011"
+    decodes: ["legal", "rd", "rs1", "mv_from_x"]
