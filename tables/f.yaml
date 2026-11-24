@@ -44,7 +44,7 @@ output:
         "eq",
         "lt",
         "le",
-        "class",
+        "fclass",
       ]
 decodes:
   - instr: "flw"
@@ -121,7 +121,7 @@ decodes:
     decodes: ["legal", "rd", "rs1", "rs2", "le"]
   - instr: "fclass.s"
     match: "111000000000.....001.....1010011"
-    decodes: ["legal", "rd", "rs1", "class"]
+    decodes: ["legal", "rd", "rs1", "fclass"]
   - instr: "fcvt.s.w"
     match: "110100000000.............1010011"
     decodes: ["legal", "rd", "rs1", "from_w"]
